@@ -1,20 +1,33 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, ChangeEvent } from "react";
 import CardList from "./components/card-list/card-list.component";
 import SearchBox from "./components/search-box/search-box.component";
 import "./App.css";
 
+import { getData } from "./utils/fetch.utils";
+
+export type Monster = {
+  id: string;
+  name: string;
+  email: string;
+}
+
 const App = () => {
   const [searchField, setSearchField] = useState("");
   const [title, setTitle] = useState ("");
-  const [monsters, setMonsters] = useState([]);
+  const [monsters, setMonsters] = useState<Monster[]>([]);
   const [filteredMonsters, setFilteredMonsters] = useState(monsters);
   
   
   useEffect(()=>{   //////// useEffect is used to prevent loop issue. When you write fetch function out of useEffect it goes into a loop. useEffect fires thnigs under it up just once
-    fetch("https://jsonplaceholder.typicode.com/users")
-    .then((response) => response.json())
-    .then((users) => setMonsters(users)
-    );
+    // fetch("https://jsonplaceholder.typicode.com/users")
+    // .then((response) => response.json())
+    // .then((users) => setMonsters(users));
+
+    const fetchUsers = async () => {
+      const users = await getData<Monster[]>('https://jsonplaceholder.typicode.com/users')
+      setMonsters(users);
+    };
+    fetchUsers();
   },[]);
 
   useEffect(()=>{  /////////// instead of triggering all the time, useEffect provides after change trigger for monsters and searchField
@@ -26,11 +39,11 @@ const App = () => {
   },[monsters, searchField]);
 
 
-  const onSearchChange = (event) => {
+  const onSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
     const searchFieldString = event.target.value.toLocaleLowerCase();
     setSearchField(searchFieldString);
   };
-  const onTitleChange = (event) => {
+  const onTitleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const searchFieldString = event.target.value.toLocaleLowerCase();
     setTitle(searchFieldString);
   };
@@ -41,13 +54,13 @@ const App = () => {
     <div className="App">
       <h1 className="app-title">{title}</h1>
       <SearchBox
-        class={"monster-search-box"}
+        className={"monster-search-box"}
         onChangeHandler={onSearchChange}
         placeholder={"search monsters"}
       />
       <br/>
       <SearchBox
-        class={"title-search-box"}
+        className={"title-search-box"}
         onChangeHandler={onTitleChange}
         placeholder={"set title"}
       />
